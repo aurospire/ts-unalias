@@ -1,12 +1,25 @@
 import ts from 'typescript';
-import { getTsConfigPathAliases } from './getTsConfigPathAliases';
-import { parseAliases } from './parseAliases';
-import { resolveAlias } from './resolveAlias';
+import { ResolvedExternalPath, resolveExternalPath } from './resolveExternalPath';
+import { PathAlias, fetchAliasPaths  } from './aliases';
+import { Logger, defaultLogger } from './util';
 
-export const unaliasTransformerFactory = (program: ts.Program): ts.TransformerFactory<ts.SourceFile> => {
-    const tsAliases = getTsConfigPathAliases();
+export type ExternalPathData = { type: 'export' | 'import'; } & ResolvedExternalPath;
 
-    const aliases = parseAliases(tsAliases);
+export type UnaliasTransformOptions = {
+    level: 'silent' | 'alias' | 'all';
+    log: (data: ExternalPathData) => void;
+};
+
+export const unaliasTransformerFactory = (
+    program: ts.Program,
+    aliases?: PathAlias[] | true | Logger<PathAlias[]>,
+    options?: Partial<UnaliasTransformOptions>
+): ts.TransformerFactory<ts.SourceFile> => {
+
+    const pathAliases = (!Array.isArray(aliases) ? fetchAliasPaths(aliases) : aliases) as PathAlias[];
+
+    const opts: UnaliasTransformOptions = { level: 'silent', log: defaultLogger, ...(options ?? {}) };
+
 
     return (context: ts.TransformationContext) => {
 
@@ -18,10 +31,14 @@ export const unaliasTransformerFactory = (program: ts.Program): ts.TransformerFa
                     && node.moduleSpecifier
                     && ts.isStringLiteral(node.moduleSpecifier)
                 ) {
-                    const newPath = resolveAlias(node.moduleSpecifier.text, file.fileName, aliases);
+                    const resolved = resolveExternalPath(node.moduleSpecifier.text, file.fileName, pathAliases);
 
-                    if (newPath !== node.moduleSpecifier.text) {
-                        const newModuleSpecifier = ts.factory.createStringLiteral(newPath);
+                    if (opts.level === 'all' || (opts.level === 'alias' && resolved.aliased))
+                        opts.log({ type: 'import', ...resolved });
+
+
+                    if (resolved.relativeToPath !== node.moduleSpecifier.text) {
+                        const newModuleSpecifier = ts.factory.createStringLiteral(resolved.relativeToPath);
 
                         return ts.factory.updateImportDeclaration(
                             node,
@@ -36,10 +53,13 @@ export const unaliasTransformerFactory = (program: ts.Program): ts.TransformerFa
                     && node.moduleSpecifier
                     && ts.isStringLiteral(node.moduleSpecifier)
                 ) {
-                    const newPath = resolveAlias(node.moduleSpecifier.text, file.fileName, aliases);
+                    const resolved = resolveExternalPath(node.moduleSpecifier.text, file.fileName, pathAliases);
 
-                    if (newPath !== node.moduleSpecifier.text) {
-                        const newModuleSpecifier = ts.factory.createStringLiteral(newPath);
+                    if (opts.level === 'all' || (opts.level === 'alias' && resolved.aliased))
+                        opts.log({ type: 'export', ...resolved });
+
+                    if (resolved.relativeToPath !== node.moduleSpecifier.text) {
+                        const newModuleSpecifier = ts.factory.createStringLiteral(resolved.relativeToPath);
 
                         return ts.factory.updateExportDeclaration(
                             node,
