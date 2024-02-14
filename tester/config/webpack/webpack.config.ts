@@ -4,7 +4,7 @@ import { Configuration } from 'webpack';
 import nodeExternals from 'webpack-node-externals';
 import NodemonPlugin from 'nodemon-webpack-plugin';
 
-import { unaliasTransformerFactory } from 'ts-unalias';
+import { unaliasTransformerFactory, webpackAliases } from 'ts-unalias';
 
 const config: Configuration = {
     entry: './src/index.ts',
@@ -30,7 +30,7 @@ const config: Configuration = {
         //     '@components': nodepath.resolve(__dirname, '..', '..', 'src/components'),
         //     '@models': nodepath.resolve(__dirname, '..', '..', 'src/models'),
         // }
-        alias: 
+        alias: webpackAliases(nodepath.resolve(__dirname, '..', '..'), { log: true })
     },
     module: {
         rules: [

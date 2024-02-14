@@ -23,7 +23,8 @@ export const parseTsConfigPaths = (paths: TsConfigPaths): PathAlias[] => {
         const [, toName] = (to[0]).match(/^(.+?)(\/\*)?$/) ?? [];
 
         return {
-            name: alias,
+            name,
+            full: alias,
             to: toName,
             regex: folder ? new RegExp(`^${name}\/(.*)$`) : new RegExp(`^${name}$`)
         } as PathAlias;

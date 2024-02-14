@@ -5,9 +5,45 @@ import { PathAlias, fetchAliasPaths } from '../aliases';
 import { Logger, consoleLogger, silentLogger } from '../util';
 
 
+export type UnaliasTransformAliasesOptions = {
+    from?: PathAlias[] | { searchPath?: string, configPath?: string; };
+    log?: boolean | string | Logger<PathAlias[]>;
+};
+
 export type UnaliasTransformOptions = {
-    aliases: PathAlias[] | boolean | Logger<PathAlias[]>;
-    onResolve: boolean | Logger<ExternalPath>;
+    aliases: PathAlias[] | boolean | UnaliasTransformAliasesOptions;
+    onResolve: boolean | string | Logger<ExternalPath>;
+};
+
+const resolveAliases = (options: UnaliasTransformOptions['aliases']): PathAlias[] => {
+    let opts: UnaliasTransformAliasesOptions;
+
+    if (Array.isArray(options))
+        opts = { from: options };
+    else if (typeof options === 'boolean')
+        opts = { from: {}, log: options };
+    else
+        opts = options;
+
+    if (Array.isArray(opts.from))
+        return opts.from;
+    else if (typeof opts.from === 'boolean')
+        return fetchAliasPaths({ log: true });
+    else
+        return fetchAliasPaths({
+            searchPath: opts.from?.searchPath,
+            configPath: opts.from?.configPath,
+            log: opts.log
+        });
+
+};
+
+const resolveOnResolve = (options: UnaliasTransformOptions['onResolve']): Logger<ExternalPath> => {
+    return options === true
+        ? consoleLogger('unalias.transform:resolve')
+        : typeof options === 'string'
+            ? consoleLogger(options)
+            : typeof options === 'function' ? options : silentLogger();
 };
 
 export const unaliasTransformerFactory = (
@@ -15,13 +51,14 @@ export const unaliasTransformerFactory = (
     options?: Partial<UnaliasTransformOptions>
 ): ts.TransformerFactory<ts.SourceFile> => {
 
-    const opts: UnaliasTransformOptions = { aliases: false, onResolve: false, ...(options ?? {}) };
+    const opts: UnaliasTransformOptions = {
+        aliases: false,
+        onResolve: false, ...(options ?? {})
+    };
 
-    const aliases: PathAlias[] = !Array.isArray(opts.aliases)
-        ? fetchAliasPaths(opts.aliases === true ? 'unalias.transform:alias' : opts.aliases)
-        : opts.aliases;
+    const aliases = resolveAliases(opts.aliases);
 
-    const onResolve = opts.onResolve === true ? consoleLogger('unalias.transform:resolve') : typeof opts.onResolve === 'function' ? opts.onResolve : silentLogger();
+    const onResolve = resolveOnResolve(opts.onResolve);
 
     return (context: ts.TransformationContext) => {
 
