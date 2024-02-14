@@ -25,11 +25,12 @@ const config: Configuration = {
         extensions: ['.ts', '.js'],
         modules: ['node_modules'],
         mainFiles: ['index'],
-        alias: {
-            '@utils': nodepath.resolve(__dirname, '..', '..', 'src/utils'),
-            '@components': nodepath.resolve(__dirname, '..', '..', 'src/components'),
-            '@models': nodepath.resolve(__dirname, '..', '..', 'src/models'),
-        }
+        // alias: {
+        //     '@utils': nodepath.resolve(__dirname, '..', '..', 'src/utils'),
+        //     '@components': nodepath.resolve(__dirname, '..', '..', 'src/components'),
+        //     '@models': nodepath.resolve(__dirname, '..', '..', 'src/models'),
+        // }
+        alias: 
     },
     module: {
         rules: [
