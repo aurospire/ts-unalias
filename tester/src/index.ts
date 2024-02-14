@@ -1,5 +1,5 @@
-export const greeting = (name: string = 'aurospire') => {
-    return `Hello, ${name}! Welcome to the tester project!`;
-};
+export { Button } from '@components/Button';
+export { Header } from '@components/Header';
+export { User, Product } from '@models/index'
+export { APP_NAME } from '@utils/constants';
 
-console.log(greeting());

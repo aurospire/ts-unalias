@@ -4,6 +4,8 @@ import { Configuration } from 'webpack';
 import nodeExternals from 'webpack-node-externals';
 import NodemonPlugin from 'nodemon-webpack-plugin';
 
+import { unaliasTransformerFactory } from 'ts-unalias';
+
 const config: Configuration = {
     entry: './src/index.ts',
     mode: process.env.NODE_ENV === 'production' ? 'production' : process.env.NODE_ENV === 'development' ? 'development' : 'none',
@@ -24,14 +26,23 @@ const config: Configuration = {
         modules: ['node_modules'],
         mainFiles: ['index'],
         alias: {
-            '@': nodepath.resolve(__dirname, '..', '..', 'src')
+            '@utils': nodepath.resolve(__dirname, '..', '..', 'src/utils'),
+            '@components': nodepath.resolve(__dirname, '..', '..', 'src/components'),
+            '@models': nodepath.resolve(__dirname, '..', '..', 'src/models'),
         }
     },
     module: {
         rules: [
             {
                 test: /.ts$/,
-                use: ['ts-loader']
+                use: [{
+                    loader: 'ts-loader',
+                    options: {
+                        getCustomTransformers: (program: any) => ({
+                            afterDeclarations: [unaliasTransformerFactory(program, { aliases: true, onResolve: true })]
+                        }),
+                    },
+                }]
             }
         ]
     },
