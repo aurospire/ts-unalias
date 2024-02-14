@@ -1,0 +1,39 @@
+{
+    "name": "tester",
+    "author": "aurospire",
+    "version": "0.0.0",
+    "license": "UNLICENSED",
+    "private": true,
+    "main": "dist/index.ts",
+    "types": "dist/index.d.ts",
+    "files": [
+        "/dist"
+    ],
+    "exports": {
+        ".": "./dist/index.js"
+    },
+    "typesVersions": {
+        "*": {}
+    },
+    "config": {
+        "watch": "./src;package*.json"
+    },
+    "scripts": {
+        "start": "node ./dist/index.js",
+        "watch": "webpack --watch -c config/webpack/webpack.config.ts",
+        "build": "webpack -c config/webpack/webpack.config.ts"
+    },
+    "devDependencies": {
+        "@types/node": "^20.11.17",
+        "@types/webpack-node-externals": "^3.0.4",
+        "nodemon": "^3.0.3",
+        "nodemon-webpack-plugin": "^4.8.2",
+        "ts-loader": "^9.5.1",
+        "ts-node": "^10.9.2",
+        "ts-unalias": "file:..",
+        "typescript": "^5.3.3",
+        "webpack": "^5.90.1",
+        "webpack-cli": "^5.1.4",
+        "webpack-node-externals": "^3.0.0"
+    }
+}
