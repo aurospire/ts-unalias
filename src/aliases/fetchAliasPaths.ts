@@ -1,15 +1,20 @@
 import { Logger, consoleLogger, lineLogger } from "../util";
 import { PathAlias } from "./PathAlias";
-import { getTsConfigPathAliases } from "./getTsConfigPathAliases";
-import { parseAliases } from "./parseAliases";
+import { getTsConfigPaths, parseTsConfigPaths } from "./TsConfigPaths";
 
-export const fetchAliasPaths = (log?: boolean | Logger<PathAlias[]>): PathAlias[] => {
-    const tsAliases = getTsConfigPathAliases();
+export const fetchAliasPaths = ({ searchPath, configPath, log }: {
+    searchPath?: string;
+    configPath?: string;
+    log?: boolean | string | Logger<PathAlias[]>;
+} = {}): PathAlias[] => {
+    const tsAliases = getTsConfigPaths(searchPath, configPath);
 
-    const parsed = parseAliases(tsAliases);
+    const parsed = parseTsConfigPaths(tsAliases);
 
     if (log === true)
-        lineLogger(consoleLogger('ts-unalias:alias'))(parsed);
+        lineLogger(consoleLogger())(parsed);
+    else if (typeof log === 'string')
+        lineLogger(consoleLogger(log))(parsed);
     else if (log !== false && log !== undefined)
         log(parsed);
 

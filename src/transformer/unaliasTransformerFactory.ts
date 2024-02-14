@@ -17,9 +17,11 @@ export const unaliasTransformerFactory = (
 
     const opts: UnaliasTransformOptions = { aliases: false, onResolve: false, ...(options ?? {}) };
 
-    const aliases = (!Array.isArray(opts.aliases) ? fetchAliasPaths(opts.aliases) : opts.aliases) as PathAlias[];
+    const aliases: PathAlias[] = !Array.isArray(opts.aliases)
+        ? fetchAliasPaths(opts.aliases === true ? 'unalias.transform:alias' : opts.aliases)
+        : opts.aliases;
 
-    const onResolve = opts.onResolve === true ? consoleLogger('ts-unalias:resolve') : typeof opts.onResolve === 'function' ? opts.onResolve : silentLogger();
+    const onResolve = opts.onResolve === true ? consoleLogger('unalias.transform:resolve') : typeof opts.onResolve === 'function' ? opts.onResolve : silentLogger();
 
     return (context: ts.TransformationContext) => {
 

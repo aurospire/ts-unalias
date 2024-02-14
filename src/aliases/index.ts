@@ -1,5 +1,3 @@
 export * from './fetchAliasPaths';
-export * from './getTsConfigPathAliases';
-export * from './parseAliases';
+export * from './TsConfigPaths';
 export * from './PathAlias';
-export * from './TsConfigPathAlias';
