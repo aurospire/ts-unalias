@@ -10,7 +10,7 @@ export const consoleLogger = <T = any>(from?: string): Logger<T> => (data: T) =>
     console.log(from ? `[${from}]:` : '', inspected);
 };
 
-export const lineLogger = <T = any>(logger: Logger<T> = consoleLogger<T>()): Logger<T[]> => (data: T[]) => {
+export const lineLogger = <T = any>(logger: Logger<T>): Logger<T[]> => (data: T[]) => {
     for (const item of data)
         logger(item);
 };
