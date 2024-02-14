@@ -1,13 +1,13 @@
 import ts from 'typescript';
-import { ResolvedExternalPath, resolveExternalPath } from './resolveExternalPath';
-import { PathAlias, fetchAliasPaths  } from './aliases';
-import { Logger, defaultLogger } from './util';
+import { resolveExternalPath } from './resolveExternalPath';
+import { ExternalPath } from './ExternalPath';
+import { PathAlias, fetchAliasPaths } from '../aliases';
+import { Logger, defaultLogger } from '../util';
 
-export type ExternalPathData = { type: 'export' | 'import'; } & ResolvedExternalPath;
 
 export type UnaliasTransformOptions = {
     level: 'silent' | 'alias' | 'all';
-    log: (data: ExternalPathData) => void;
+    log: Logger<ExternalPath>;
 };
 
 export const unaliasTransformerFactory = (

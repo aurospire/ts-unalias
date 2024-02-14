@@ -1,16 +1,9 @@
 import nodepath from 'path';
 
-import { PathAlias } from './aliases';
+import { PathAlias } from '../aliases';
+import { ExternalPath } from './ExternalPath';
 
-export type ResolvedExternalPath = {
-    aliased: boolean;    
-    fromPath: string;
-    toPath: string;
-    fullToPath: string;
-    relativeToPath: string;
-};
-
-export const resolvePath = (aliased: boolean, fromPath: string, toPath: string, suffix?: string): ResolvedExternalPath => {
+const resolvePath = (aliased: boolean, fromPath: string, toPath: string, suffix?: string): ExternalPath => {
     const fullToPath: string = suffix ? nodepath.resolve(toPath, suffix) : toPath;
 
     let relativeToPath = nodepath.relative(nodepath.dirname(fromPath), fullToPath);
@@ -26,7 +19,7 @@ export const resolvePath = (aliased: boolean, fromPath: string, toPath: string, 
     };
 };
 
-export const resolveExternalPath = (fromPath: string, toPath: string, aliases: PathAlias[]): ResolvedExternalPath => {
+export const resolveExternalPath = (fromPath: string, toPath: string, aliases: PathAlias[]): ExternalPath => {
     for (const alias of aliases) {
         const match = fromPath.match(alias.regex);
 
