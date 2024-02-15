@@ -4,7 +4,7 @@ import { Configuration } from 'webpack';
 import nodeExternals from 'webpack-node-externals';
 import NodemonPlugin from 'nodemon-webpack-plugin';
 
-import { unaliasTransformerFactory, webpackAliases } from 'ts-unalias';
+import { unaliasTransformerFactory, extractWebpackAliases, extractTsConfigPaths, getTsCompilerOptions, extractPathAliases } from 'ts-unalias';
 
 const config: Configuration = {
     entry: './src/index.ts',
@@ -30,7 +30,7 @@ const config: Configuration = {
         //     '@components': nodepath.resolve(__dirname, '..', '..', 'src/components'),
         //     '@models': nodepath.resolve(__dirname, '..', '..', 'src/models'),
         // }
-        alias: webpackAliases(nodepath.resolve(__dirname, '..', '..'), { log: true })
+        alias: extractWebpackAliases(extractPathAliases(extractTsConfigPaths(getTsCompilerOptions())), nodepath.resolve(__dirname, '..', '..'))        
     },
     module: {
         rules: [
@@ -40,7 +40,7 @@ const config: Configuration = {
                     loader: 'ts-loader',
                     options: {
                         getCustomTransformers: (program: any) => ({
-                            afterDeclarations: [unaliasTransformerFactory(program, { aliases: true, onResolve: true })]
+                            afterDeclarations: [unaliasTransformerFactory(program)]
                         }),
                     },
                 }]
