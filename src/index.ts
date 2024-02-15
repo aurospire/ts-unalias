@@ -1,2 +1,3 @@
-export { PathAlias, fetchAliasPaths } from './aliases';
-export { ExternalPath, unaliasTransformerFactory } from './transformer';
+export * from './aliases';
+export * from './transformer';
+export * from './util';

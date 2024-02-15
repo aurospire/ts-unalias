@@ -2,24 +2,63 @@ import ts from 'typescript';
 import { resolveExternalPath } from './resolveExternalPath';
 import { ExternalPath } from './ExternalPath';
 import { PathAlias, fetchAliasPaths } from '../aliases';
-import { Logger, defaultLogger } from '../util';
+import { Logger, consoleLogger, silentLogger } from '../util';
 
+
+export type UnaliasTransformAliasesOptions = {
+    from?: PathAlias[] | { searchPath?: string, configPath?: string; };
+    log?: boolean | string | Logger<PathAlias[]>;
+};
 
 export type UnaliasTransformOptions = {
-    level: 'silent' | 'alias' | 'all';
-    log: Logger<ExternalPath>;
+    aliases: PathAlias[] | boolean | UnaliasTransformAliasesOptions;
+    onResolve: boolean | string | Logger<ExternalPath>;
+};
+
+const resolveAliases = (options: UnaliasTransformOptions['aliases']): PathAlias[] => {
+    let opts: UnaliasTransformAliasesOptions;
+
+    if (Array.isArray(options))
+        opts = { from: options };
+    else if (typeof options === 'boolean')
+        opts = { from: {}, log: options };
+    else
+        opts = options;
+
+    if (Array.isArray(opts.from))
+        return opts.from;
+    else if (typeof opts.from === 'boolean')
+        return fetchAliasPaths({ log: true });
+    else
+        return fetchAliasPaths({
+            searchPath: opts.from?.searchPath,
+            configPath: opts.from?.configPath,
+            log: opts.log
+        });
+
+};
+
+const resolveOnResolve = (options: UnaliasTransformOptions['onResolve']): Logger<ExternalPath> => {
+    return options === true
+        ? consoleLogger('unalias.transform:resolve')
+        : typeof options === 'string'
+            ? consoleLogger(options)
+            : typeof options === 'function' ? options : silentLogger();
 };
 
 export const unaliasTransformerFactory = (
     program: ts.Program,
-    aliases?: PathAlias[] | true | Logger<PathAlias[]>,
     options?: Partial<UnaliasTransformOptions>
 ): ts.TransformerFactory<ts.SourceFile> => {
 
-    const pathAliases = (!Array.isArray(aliases) ? fetchAliasPaths(aliases) : aliases) as PathAlias[];
+    const opts: UnaliasTransformOptions = {
+        aliases: false,
+        onResolve: false, ...(options ?? {})
+    };
 
-    const opts: UnaliasTransformOptions = { level: 'silent', log: defaultLogger, ...(options ?? {}) };
+    const aliases = resolveAliases(opts.aliases);
 
+    const onResolve = resolveOnResolve(opts.onResolve);
 
     return (context: ts.TransformationContext) => {
 
@@ -31,11 +70,9 @@ export const unaliasTransformerFactory = (
                     && node.moduleSpecifier
                     && ts.isStringLiteral(node.moduleSpecifier)
                 ) {
-                    const resolved = resolveExternalPath(node.moduleSpecifier.text, file.fileName, pathAliases);
+                    const resolved = resolveExternalPath(file.fileName, node.moduleSpecifier.text, aliases);
 
-                    if (opts.level === 'all' || (opts.level === 'alias' && resolved.aliased))
-                        opts.log({ type: 'import', ...resolved });
-
+                    onResolve({ type: 'import', ...resolved });
 
                     if (resolved.relativeToPath !== node.moduleSpecifier.text) {
                         const newModuleSpecifier = ts.factory.createStringLiteral(resolved.relativeToPath);
@@ -53,10 +90,9 @@ export const unaliasTransformerFactory = (
                     && node.moduleSpecifier
                     && ts.isStringLiteral(node.moduleSpecifier)
                 ) {
-                    const resolved = resolveExternalPath(node.moduleSpecifier.text, file.fileName, pathAliases);
+                    const resolved = resolveExternalPath(file.fileName, node.moduleSpecifier.text, aliases);
 
-                    if (opts.level === 'all' || (opts.level === 'alias' && resolved.aliased))
-                        opts.log({ type: 'export', ...resolved });
+                    onResolve({ type: 'export', ...resolved });
 
                     if (resolved.relativeToPath !== node.moduleSpecifier.text) {
                         const newModuleSpecifier = ts.factory.createStringLiteral(resolved.relativeToPath);
