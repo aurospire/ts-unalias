@@ -8,7 +8,9 @@ const resolvePath = (aliased: boolean, fromPath: string, toPath: string, suffix?
 
     const fullFromPath: string = nodepath.resolve(base);
 
-    const fullToPath: string = suffix ? nodepath.resolve(toPath, suffix) : nodepath.resolve(toPath);
+    const fullToPath: string = aliased
+        ? suffix ? nodepath.resolve(toPath, suffix) : nodepath.resolve(toPath)
+        : (toPath.match(/^([\.]|[^\/\\])/) ? nodepath.resolve(base, toPath) : toPath);
 
     let relativeToPath = nodepath.relative(nodepath.dirname(fromPath), fullToPath);
 
