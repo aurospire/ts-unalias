@@ -1,24 +1,25 @@
 import ts from 'typescript';
-import { resolveExternalPath } from './resolveExternalPath';
-import { ExternalPath } from './ExternalPath';
-import { PathAlias, fetchAliasPaths } from '../aliases';
+import { ExternalPath, resolveExternalPath } from './resolveExternalPath';
+import { PathAlias, TsConfigPath, extractPathAliases, extractTsConfigPaths } from '../aliases';
 
-export type UnaliasTransformAliasesOptions = {
-    from?: PathAlias[];
-
-};
 
 export type UnaliasTransformOptions = {
-    aliases?: PathAlias[] | { searchPath?: string, configPath?: string; };
-    onPath?: (item: PathAlias) => void;
+    onTsPath?: (item: TsConfigPath) => void;
+    onPathAlias?: (item: PathAlias) => void;
     onResolve?: (item: ExternalPath) => void;
 };
 
 export const unaliasTransformerFactory = (
     program: ts.Program,
-    options?: Partial<UnaliasTransformOptions>
+    options: Partial<UnaliasTransformOptions> = {}
 ): ts.TransformerFactory<ts.SourceFile> => {
+
     return (context: ts.TransformationContext) => {
+        const compilerOptions = context.getCompilerOptions();
+
+        const tsConfigPaths = extractTsConfigPaths(compilerOptions, options.onTsPath);
+
+        const aliases = extractPathAliases(tsConfigPaths, options.onPathAlias)
 
         return (file: ts.SourceFile): ts.SourceFile => {
 
@@ -30,7 +31,7 @@ export const unaliasTransformerFactory = (
                 ) {
                     const resolved = resolveExternalPath(file.fileName, node.moduleSpecifier.text, aliases);
 
-                    onResolve({ type: 'import', ...resolved });
+                    options.onResolve?.({ type: 'import', ...resolved });
 
                     if (resolved.relativeToPath !== node.moduleSpecifier.text) {
                         const newModuleSpecifier = ts.factory.createStringLiteral(resolved.relativeToPath);
@@ -50,7 +51,7 @@ export const unaliasTransformerFactory = (
                 ) {
                     const resolved = resolveExternalPath(file.fileName, node.moduleSpecifier.text, aliases);
 
-                    onResolve({ type: 'export', ...resolved });
+                    options.onResolve?.({ type: 'export', ...resolved });
 
                     if (resolved.relativeToPath !== node.moduleSpecifier.text) {
                         const newModuleSpecifier = ts.factory.createStringLiteral(resolved.relativeToPath);

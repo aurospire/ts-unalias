@@ -1,7 +1,15 @@
 import nodepath from 'path';
 
 import { PathAlias } from '../aliases';
-import { ExternalPath } from './ExternalPath';
+
+export type ExternalPath = {
+    type?: 'import' | 'export';
+    aliased: boolean;
+    fromPath: string;
+    toPath: string;
+    fullToPath: string;
+    relativeToPath: string;
+};
 
 const resolvePath = (aliased: boolean, fromPath: string, toPath: string, suffix?: string): ExternalPath => {
     const base = nodepath.parse(fromPath).dir;
