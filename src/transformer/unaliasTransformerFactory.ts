@@ -70,7 +70,7 @@ export const unaliasTransformerFactory = (
                     && node.moduleSpecifier
                     && ts.isStringLiteral(node.moduleSpecifier)
                 ) {
-                    const resolved = resolveExternalPath(node.moduleSpecifier.text, file.fileName, aliases);
+                    const resolved = resolveExternalPath(file.fileName, node.moduleSpecifier.text, aliases);
 
                     onResolve({ type: 'import', ...resolved });
 
@@ -90,7 +90,7 @@ export const unaliasTransformerFactory = (
                     && node.moduleSpecifier
                     && ts.isStringLiteral(node.moduleSpecifier)
                 ) {
-                    const resolved = resolveExternalPath(node.moduleSpecifier.text, file.fileName, aliases);
+                    const resolved = resolveExternalPath(file.fileName, node.moduleSpecifier.text, aliases);
 
                     onResolve({ type: 'export', ...resolved });
 
