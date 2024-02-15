@@ -1,6 +1,6 @@
 import { Logger, consoleLogger, lineLogger } from "../util";
 import { PathAlias } from "./PathAlias";
-import { getTsConfigPaths, parseTsConfigPaths } from "./TsConfigPaths";
+import { getTsConfigPaths, parseTsConfigPaths } from "./getTsConfigPaths";
 
 export const fetchAliasPaths = ({ searchPath, configPath, log }: {
     searchPath?: string;

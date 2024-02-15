@@ -1,4 +1,4 @@
 export * from './fetchAliasPaths';
-export * from './TsConfigPaths';
+export * from './getTsConfigPaths';
 export * from './PathAlias';
 export * from './webpackAliases';
