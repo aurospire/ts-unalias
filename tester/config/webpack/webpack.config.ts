@@ -4,7 +4,7 @@ import { Configuration } from 'webpack';
 import nodeExternals from 'webpack-node-externals';
 import NodemonPlugin from 'nodemon-webpack-plugin';
 
-import { unaliasTransformerFactory, extractWebpackAliases, extractTsConfigPaths, getTsCompilerOptions, extractPathAliases } from 'ts-unalias';
+import { unaliasTransformerFactory, extractWebpackAliases, extractTsConfigPaths, getTsCompilerOptions, extractPathAliases, webpackAliases } from 'ts-unalias';
 
 const config: Configuration = {
     entry: './src/index.ts',
@@ -30,7 +30,11 @@ const config: Configuration = {
         //     '@components': nodepath.resolve(__dirname, '..', '..', 'src/components'),
         //     '@models': nodepath.resolve(__dirname, '..', '..', 'src/models'),
         // }
-        alias: extractWebpackAliases(extractPathAliases(extractTsConfigPaths(getTsCompilerOptions())), nodepath.resolve(__dirname, '..', '..'))        
+        alias: webpackAliases(nodepath.resolve(__dirname, '..', '..'), {
+            // onTsPath: (item => console.log(item)),
+            // onPathAlias: (item => console.log(item)),
+            // onWebpackAlias: (item => console.log(item))
+        })
     },
     module: {
         rules: [
@@ -40,7 +44,10 @@ const config: Configuration = {
                     loader: 'ts-loader',
                     options: {
                         getCustomTransformers: (program: any) => ({
-                            afterDeclarations: [unaliasTransformerFactory(program)]
+                            afterDeclarations: [unaliasTransformerFactory(program, {
+                                onPathAlias: (item) => console.log(item),
+                                //onResolve: (item) => console.log(item)
+                            })]
                         }),
                     },
                 }]
