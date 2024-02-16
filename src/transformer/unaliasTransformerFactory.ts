@@ -14,16 +14,13 @@ export const unaliasTransformerFactory = (
     options?: UnaliasTransformOptions
 ): ts.TransformerFactory<ts.SourceFile> => {
 
-    let aliases: PathAlias[] | undefined;
+    const compilerOptions = program.getCompilerOptions();
+
+    const tsConfigPaths = extractTsConfigPaths(compilerOptions, options?.onTsPath);
+
+    const aliases = extractPathAliases(tsConfigPaths, options?.onPathAlias);
 
     return (context: ts.TransformationContext) => {
-        if (!aliases) {
-            const compilerOptions = context.getCompilerOptions();
-
-            const tsConfigPaths = extractTsConfigPaths(compilerOptions, options?.onTsPath);
-    
-            aliases = extractPathAliases(tsConfigPaths, options?.onPathAlias);
-        }
 
         return (file: ts.SourceFile): ts.SourceFile => {
 
