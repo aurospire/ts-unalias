@@ -24,22 +24,19 @@ export const unaliasTransformerFactory = (
     program: ts.Program,
     options?: UnaliasTransformOptions
 ): ts.TransformerFactory<ts.SourceFile> => {
-
-    // Extract TypeScript compiler options from the program
     const compilerOptions = program.getCompilerOptions();
 
-    // Extract TypeScript path mappings from compiler options
     const tsConfigPaths = extractTsConfigPaths(compilerOptions, options?.onTsPath);
 
-    // Extract path aliases from TypeScript path mappings
     const aliases = extractPathAliases(tsConfigPaths, options?.onPathAlias);
 
-    // Return the transformer factory function
     return (context: ts.TransformationContext) => {
+
         return (file: ts.SourceFile): ts.SourceFile => {
 
             // Visitor function to traverse and transform AST nodes
             const visit: ts.Visitor = (node: ts.Node): ts.VisitResult<ts.Node> => {
+                
                 // Handle import declarations
                 if (ts.isImportDeclaration(node) && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
                     const resolved = resolveExternalPath(file.fileName, node.moduleSpecifier.text, aliases!);
