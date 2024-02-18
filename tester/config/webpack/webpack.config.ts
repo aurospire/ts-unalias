@@ -31,9 +31,9 @@ const config: Configuration = {
         //     '@models': nodepath.resolve(__dirname, '..', '..', 'src/models'),
         // }
         alias: webpackAliases(nodepath.resolve(__dirname, '..', '..'), {
-            // onTsPath: (item => console.log(item)),
-            // onPathAlias: (item => console.log(item)),
-            // onWebpackAlias: (item => console.log(item))
+            onTsPath: true,
+            onPathAlias: false,
+            onWebpackAlias: '[WEBPACK]: ${item}'
         })
     },
     module: {
@@ -45,8 +45,8 @@ const config: Configuration = {
                     options: {
                         getCustomTransformers: (program: any) => ({
                             afterDeclarations: [unaliasTransformerFactory(program, {
-                                onPathAlias: (item) => console.log(item),
-                                //onResolve: (item) => console.log(item)
+                                onPathAlias: true,
+                                onExternalPath: true,
                             })]
                         }),
                     },

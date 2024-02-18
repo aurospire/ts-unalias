@@ -50,7 +50,10 @@
     "paths": {
       "@utils/*": ["utils/*"],
       "@components/*": ["components/*"],
-      "@models/*": ["models/*"]
+      "@models/*": ["models/*"],
+      "@components": ["components"],
+      "@utils": ["utils"],
+      "@models": ["models"]
     },
     // "rootDirs": [],                              /* List of root folders whose combined content represents the structure of the project at runtime. */
     // "typeRoots": [],                             /* List of folders to include type definitions from. */
