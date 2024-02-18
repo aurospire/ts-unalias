@@ -110,6 +110,16 @@ type WebpackAlias = {
     resolved: string;
 };
 ```
+### `JestAlias`
+
+Represents a Jest alias configuration.
+
+```typescript
+type WebpackAlias = {
+    from: string;
+    to: string;
+};
+```
 
 ### `WebpackAliasesOptions`
 
@@ -122,6 +132,19 @@ type WebpackAliasesOptions = {
     onTsPath?: NotifierType<TsConfigPath>;
     onPathAlias?: NotifierType<PathAlias>;
     onWebpackAlias?: NotifierType<WebpackAlias>;
+};
+```
+### `JestAliasesOptions`
+
+Options for generating Webpack aliases.
+
+```typescript
+type WebpackAliasesOptions = {
+    searchPath?: string;
+    configName?: string;
+    onTsPath?: NotifierType<TsConfigPath>;
+    onPathAlias?: NotifierType<PathAlias>;
+    onJestAlias?: NotifierType<JestAlias>;
 };
 ```
 
@@ -215,6 +238,16 @@ webpackAliases(
 ): Record<string, string>
 ```
 
+### jestAliases
+
+Generates Jest alias configurations based on TypeScript path mappings.
+
+```typescript
+jestAliases(
+    options?: JestAliasesOptions
+): Record<string, string>
+```
+
 ## Example: Using with Webpack
 
 ```typescript
@@ -244,9 +277,9 @@ const config: Configuration = {
         mainFiles: ['index'],
         // Use to auto populate aliases from tsconfig file
         alias: webpackAliases(path.resolve(__dirname, '..', '..'), {
-            onTsPath: (item => console.log(item)),
-            onPathAlias: (item => console.log(item)),
-            onWebpackAlias: (item => console.log(item))
+            onTsPath: item => console.log(item),
+            onPathAlias: true,
+            onWebpackAlias: false
         })
     },
     module: {
@@ -259,8 +292,8 @@ const config: Configuration = {
                         getCustomTransformers: (program: any) => ({
                             // Use to unalias all imports/exports in d.ts files
                             afterDeclarations: [unaliasTransformerFactory(program, {
-                                onPathAlias: (item) => console.log(item),
-                                onResolve: (item) => console.log(item)
+                                onPathAlias: true
+                                onExternalPath: '[EXTERNAL PATH]: ${item}'
                             })]
                         }),
                     },
