@@ -1,3 +1,4 @@
+import { NotifierType } from "../util";
 import { PathAlias, extractPathAliases } from "./extractPathAliases";
 import { TsConfigPath, extractTsConfigPaths } from "./extractTsConfigPaths";
 import { WebpackAlias, extractWebpackAliases } from "./extractWebpackAliases";
@@ -11,12 +12,12 @@ export type WebpackAliasesOptions = {
     searchPath?: string,
     /** The name of the tsconfig file to search for. */
     configName?: string,
-    /** Optional callback function called for each TsConfigPath extracted. */
-    onTsPath?: (item: TsConfigPath) => void;
-    /** Optional callback function called for each PathAlias extracted. */
-    onPathAlias?: (item: PathAlias) => void;
-    /** Optional callback function called for each WebpackAlias extracted. */
-    onWebpackAlias?: (item: WebpackAlias) => void;
+    /** Optional notifier type or function called for each TsConfigPath extracted. */
+    onTsPath?: NotifierType<TsConfigPath>;
+    /** Optional notifier type or function called for each PathAlias extracted. */
+    onPathAlias?: NotifierType<PathAlias>;
+    /** Optional notifier type or function called for each WebpackAlias extracted. */
+    onWebpackAlias?: NotifierType<WebpackAlias>;
 };
 
 /**

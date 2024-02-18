@@ -1,17 +1,18 @@
 import ts from 'typescript';
 import { ExternalPath, resolveExternalPath } from './resolveExternalPath';
 import { PathAlias, TsConfigPath, extractPathAliases, extractTsConfigPaths } from '../aliases';
+import { NotifierType, resolveNotifier } from '../util';
 
 /**
  * Options for the unalias transformer.
  */
 export type UnaliasTransformOptions = {
-    /** Optional callback function called for each TsConfigPath extracted. */
-    onTsPath?: (item: TsConfigPath) => void;
-    /** Optional callback function called for each PathAlias extracted. */
-    onPathAlias?: (item: PathAlias) => void;
-    /** Optional callback function called for each resolved path. */
-    onResolve?: (item: ExternalPath) => void;
+    /** Optional notifier type or function called for each TsConfigPath extracted. */
+    onTsPath?: NotifierType<TsConfigPath>;
+    /** Optional notifier type or function called for each PathAlias extracted. */
+    onPathAlias?: NotifierType<PathAlias>;
+    /** Optional notifier type or function called for each resolved path. */
+    onExternalPath?: NotifierType<ExternalPath>;
 };
 
 /**
@@ -30,17 +31,19 @@ export const unaliasTransformerFactory = (
 
     const aliases = extractPathAliases(tsConfigPaths, options?.onPathAlias);
 
+    const onExternalPath = resolveNotifier(options?.onExternalPath);
     return (context: ts.TransformationContext) => {
 
         return (file: ts.SourceFile): ts.SourceFile => {
 
             // Visitor function to traverse and transform AST nodes
             const visit: ts.Visitor = (node: ts.Node): ts.VisitResult<ts.Node> => {
-                
+
                 // Handle import declarations
                 if (ts.isImportDeclaration(node) && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
                     const resolved = resolveExternalPath(file.fileName, node.moduleSpecifier.text, aliases!);
-                    options?.onResolve?.({ type: 'import', ...resolved });
+
+                    onExternalPath({ type: 'import', ...resolved });
 
                     if (resolved.relativeToPath !== node.moduleSpecifier.text) {
                         const newModuleSpecifier = ts.factory.createStringLiteral(resolved.relativeToPath);
@@ -56,7 +59,8 @@ export const unaliasTransformerFactory = (
                 // Handle export declarations
                 else if (ts.isExportDeclaration(node) && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) {
                     const resolved = resolveExternalPath(file.fileName, node.moduleSpecifier.text, aliases!);
-                    options?.onResolve?.({ type: 'export', ...resolved });
+
+                    onExternalPath({ type: 'export', ...resolved });
 
                     if (resolved.relativeToPath !== node.moduleSpecifier.text) {
                         const newModuleSpecifier = ts.factory.createStringLiteral(resolved.relativeToPath);

@@ -42,6 +42,23 @@ const emitResult = program.emit(undefined, undefined, undefined, undefined, {
 
 ## Types
 
+### `Notifier`
+
+Represents a Notify Function
+
+```typescript
+type Notifier<T> = (item: T) => void
+```
+
+### `NotifierType`
+
+Represents a Notify Function Type to Generate a Notifier<T>
+(string has ${item} placeholder)
+
+```typescript
+type NotifierType<T> = boolean | string | Notifier<T>;
+```
+
 ### `TsConfigPath`
 
 Represents a TypeScript configuration path.
@@ -100,11 +117,11 @@ Options for generating Webpack aliases.
 
 ```typescript
 type WebpackAliasesOptions = {
-    searchPath?: string,
-    configName?: string,
-    onTsPath?: (item: TsConfigPath) => void;
-    onPathAlias?: (item: PathAlias) => void;
-    onWebpackAlias?: (item: WebpackAlias) => void;
+    searchPath?: string;
+    configName?: string;
+    onTsPath?: NotifierType<TsConfigPath>;
+    onPathAlias?: NotifierType<PathAlias>;
+    onWebpackAlias?: NotifierType<WebpackAlias>;
 };
 ```
 
@@ -114,9 +131,9 @@ Options for the unalias transformer.
 
 ```typescript
 type UnaliasTransformOptions = {
-    onTsPath?: (item: TsConfigPath) => void;
-    onPathAlias?: (item: PathAlias) => void;
-    onResolve?: (item: ExternalPath) => void;
+    onTsPath?: NotifierType<TsConfigPath>;
+    onPathAlias?: NotifierType<PathAlias>;
+    onExternalPath?: NotifierType<ExternalPath>;
 };
 ```
 
@@ -129,7 +146,7 @@ Extracts TypeScript configuration paths.
 ```typescript
 extractTsConfigPaths(
     options: ts.CompilerOptions, 
-    onItem?: (item: TsConfigPath) => void
+    onItem?:  NotifierType<TsConfigPath>
 ): TsConfigPath[]
 ```
 
@@ -139,7 +156,7 @@ Extracts path aliases from TypeScript configuration paths.
 ```typescript
 extractPathAliases(
     paths: TsConfigPath[], 
-    onItem?: (item: PathAlias) => void
+    onItem?: NotifierType<PathAlias>
 ): PathAlias[]
 ```
 
@@ -151,7 +168,7 @@ Extracts Webpack alias configurations from path aliases.
 extractWebpackAliases(
     aliases: PathAlias[], 
     basePath: string,
-    onItem?: (item: WebpackAlias) => void
+    onItem?: NotifierType<WebpackAlias>
 ): Record<string, string>
 ```
 
