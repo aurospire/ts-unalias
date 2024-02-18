@@ -27,7 +27,7 @@ export const extractWebpackAliases = (aliases: PathAlias[], basePath: string, on
     const notify = resolveNotifier(onItem);
 
     for (const alias of aliases) {
-        const name = alias.name;
+        const name = alias.name + (alias.folder ? '' : '$');
         const to = alias.to;
 
         const resolved = nodepath.resolve(basePath, to);

@@ -12,6 +12,8 @@ export type PathAlias = {
     full: string;
     /** The target path for the alias. */
     to: string;
+    /** Is the alias a folder */
+    folder: boolean;
     /** Regular expression pattern for matching the alias path. */
     regex: RegExp;
 };
@@ -37,11 +39,12 @@ export const extractPathAliases = (paths: TsConfigPath[], onItem?: NotifierType<
 
         // Construct regular expression pattern for matching the alias path
         const regex = folder ? new RegExp(`^${name}\/(.*)$`) : new RegExp(`^${name}$`);
-        
+
         const result = {
             name,
             full: name,
             to: toName,
+            folder: !!folder,
             regex
         };
 
