@@ -1,5 +1,6 @@
 import nodepath from 'path';
 import { TsConfigPath } from './extractTsConfigPaths';
+import { NotifierType, resolveNotifier } from '../util';
 
 /**
  * Represents a path alias extracted from TypeScript path mappings.
@@ -18,10 +19,12 @@ export type PathAlias = {
 /**
  * Extracts path aliases from TypeScript path mappings.
  * @param paths - An array of TsConfigPath objects representing TypeScript path mappings.
- * @param onItem - Optional callback function called for each path alias extracted.
+ * @param onItem - Optional notifier type or function called for each path alias extracted.
  * @returns An array of PathAlias objects representing the extracted path aliases.
  */
-export const extractPathAliases = (paths: TsConfigPath[], onItem?: (item: PathAlias) => void): PathAlias[] => {
+export const extractPathAliases = (paths: TsConfigPath[], onItem?: NotifierType<PathAlias>): PathAlias[] => {
+    const notify = resolveNotifier(onItem);
+
     return paths.map(path => {
         // Extract alias name and folder from path name
         const [, name, folder] = path.name.match(/^(.+?)(\/\*)?$/) ?? [];
@@ -42,7 +45,7 @@ export const extractPathAliases = (paths: TsConfigPath[], onItem?: (item: PathAl
             regex
         };
 
-        onItem?.(result);
+        notify(result);
 
         return result;
     });
