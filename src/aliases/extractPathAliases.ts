@@ -1,5 +1,6 @@
 import nodepath from 'path';
 import { TsConfigPath } from './extractTsConfigPaths';
+import { NotifierType, resolveNotifier } from '../util';
 
 /**
  * Represents a path alias extracted from TypeScript path mappings.
@@ -11,6 +12,8 @@ export type PathAlias = {
     full: string;
     /** The target path for the alias. */
     to: string;
+    /** Is the alias a folder */
+    folder: boolean;
     /** Regular expression pattern for matching the alias path. */
     regex: RegExp;
 };
@@ -18,10 +21,12 @@ export type PathAlias = {
 /**
  * Extracts path aliases from TypeScript path mappings.
  * @param paths - An array of TsConfigPath objects representing TypeScript path mappings.
- * @param onItem - Optional callback function called for each path alias extracted.
+ * @param onItem - Optional notifier type or function called for each path alias extracted.
  * @returns An array of PathAlias objects representing the extracted path aliases.
  */
-export const extractPathAliases = (paths: TsConfigPath[], onItem?: (item: PathAlias) => void): PathAlias[] => {
+export const extractPathAliases = (paths: TsConfigPath[], onItem?: NotifierType<PathAlias>): PathAlias[] => {
+    const notify = resolveNotifier(onItem);
+
     return paths.map(path => {
         // Extract alias name and folder from path name
         const [, name, folder] = path.name.match(/^(.+?)(\/\*)?$/) ?? [];
@@ -34,15 +39,16 @@ export const extractPathAliases = (paths: TsConfigPath[], onItem?: (item: PathAl
 
         // Construct regular expression pattern for matching the alias path
         const regex = folder ? new RegExp(`^${name}\/(.*)$`) : new RegExp(`^${name}$`);
-        
+
         const result = {
             name,
             full: name,
             to: toName,
+            folder: !!folder,
             regex
         };
 
-        onItem?.(result);
+        notify(result);
 
         return result;
     });

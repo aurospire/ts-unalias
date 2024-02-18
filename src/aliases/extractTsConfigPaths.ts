@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import { NotifierType, resolveNotifier } from '../util';
 
 /**
  * Represents a path configuration in a TypeScript tsconfig file.
@@ -15,17 +16,18 @@ export type TsConfigPath = {
 /**
  * Extracts path configurations from TypeScript compiler options.
  * @param options - The TypeScript compiler options object.
- * @param onItem - Optional callback function called for each path configuration extracted.
+ * @param onItem - Optional notifier type or function called for each path configuration extracted.
  * @returns An array of TsConfigPath objects representing the extracted path configurations.
  */
 export const extractTsConfigPaths = (
     options: ts.CompilerOptions,
-    onItem?: (item: TsConfigPath) => void
+    onItem?: NotifierType<TsConfigPath>
 ): TsConfigPath[] => {
     const baseUrl = options.baseUrl;
 
     const paths = options.paths ?? {};
 
+    const notify = resolveNotifier(onItem);
 
     return Object.entries(paths).map(([name, to]) => {
         const result = {
@@ -33,8 +35,8 @@ export const extractTsConfigPaths = (
             baseUrl,
             to: to.length ? to : ['']
         };
-    
-        onItem?.(result);
+
+        notify(result);
 
         return result;
     });

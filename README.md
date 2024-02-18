@@ -42,6 +42,23 @@ const emitResult = program.emit(undefined, undefined, undefined, undefined, {
 
 ## Types
 
+### `Notifier`
+
+Represents a Notify Function
+
+```typescript
+type Notifier<T> = (item: T) => void
+```
+
+### `NotifierType`
+
+Represents a Notify Function Type to Generate a Notifier<T>
+(string has ${item} placeholder)
+
+```typescript
+type NotifierType<T> = boolean | string | Notifier<T>;
+```
+
 ### `TsConfigPath`
 
 Represents a TypeScript configuration path.
@@ -93,6 +110,16 @@ type WebpackAlias = {
     resolved: string;
 };
 ```
+### `JestAlias`
+
+Represents a Jest alias configuration.
+
+```typescript
+type WebpackAlias = {
+    from: string;
+    to: string;
+};
+```
 
 ### `WebpackAliasesOptions`
 
@@ -100,11 +127,24 @@ Options for generating Webpack aliases.
 
 ```typescript
 type WebpackAliasesOptions = {
-    searchPath?: string,
-    configName?: string,
-    onTsPath?: (item: TsConfigPath) => void;
-    onPathAlias?: (item: PathAlias) => void;
-    onWebpackAlias?: (item: WebpackAlias) => void;
+    searchPath?: string;
+    configName?: string;
+    onTsPath?: NotifierType<TsConfigPath>;
+    onPathAlias?: NotifierType<PathAlias>;
+    onWebpackAlias?: NotifierType<WebpackAlias>;
+};
+```
+### `JestAliasesOptions`
+
+Options for generating Webpack aliases.
+
+```typescript
+type WebpackAliasesOptions = {
+    searchPath?: string;
+    configName?: string;
+    onTsPath?: NotifierType<TsConfigPath>;
+    onPathAlias?: NotifierType<PathAlias>;
+    onJestAlias?: NotifierType<JestAlias>;
 };
 ```
 
@@ -114,9 +154,9 @@ Options for the unalias transformer.
 
 ```typescript
 type UnaliasTransformOptions = {
-    onTsPath?: (item: TsConfigPath) => void;
-    onPathAlias?: (item: PathAlias) => void;
-    onResolve?: (item: ExternalPath) => void;
+    onTsPath?: NotifierType<TsConfigPath>;
+    onPathAlias?: NotifierType<PathAlias>;
+    onExternalPath?: NotifierType<ExternalPath>;
 };
 ```
 
@@ -129,7 +169,7 @@ Extracts TypeScript configuration paths.
 ```typescript
 extractTsConfigPaths(
     options: ts.CompilerOptions, 
-    onItem?: (item: TsConfigPath) => void
+    onItem?:  NotifierType<TsConfigPath>
 ): TsConfigPath[]
 ```
 
@@ -139,7 +179,7 @@ Extracts path aliases from TypeScript configuration paths.
 ```typescript
 extractPathAliases(
     paths: TsConfigPath[], 
-    onItem?: (item: PathAlias) => void
+    onItem?: NotifierType<PathAlias>
 ): PathAlias[]
 ```
 
@@ -151,7 +191,7 @@ Extracts Webpack alias configurations from path aliases.
 extractWebpackAliases(
     aliases: PathAlias[], 
     basePath: string,
-    onItem?: (item: WebpackAlias) => void
+    onItem?: NotifierType<WebpackAlias>
 ): Record<string, string>
 ```
 
@@ -198,6 +238,16 @@ webpackAliases(
 ): Record<string, string>
 ```
 
+### jestAliases
+
+Generates Jest alias configurations based on TypeScript path mappings.
+
+```typescript
+jestAliases(
+    options?: JestAliasesOptions
+): Record<string, string>
+```
+
 ## Example: Using with Webpack
 
 ```typescript
@@ -227,9 +277,9 @@ const config: Configuration = {
         mainFiles: ['index'],
         // Use to auto populate aliases from tsconfig file
         alias: webpackAliases(path.resolve(__dirname, '..', '..'), {
-            onTsPath: (item => console.log(item)),
-            onPathAlias: (item => console.log(item)),
-            onWebpackAlias: (item => console.log(item))
+            onTsPath: item => console.log(item),
+            onPathAlias: true,
+            onWebpackAlias: false
         })
     },
     module: {
@@ -242,8 +292,8 @@ const config: Configuration = {
                         getCustomTransformers: (program: any) => ({
                             // Use to unalias all imports/exports in d.ts files
                             afterDeclarations: [unaliasTransformerFactory(program, {
-                                onPathAlias: (item) => console.log(item),
-                                onResolve: (item) => console.log(item)
+                                onPathAlias: true
+                                onExternalPath: '[EXTERNAL PATH]: ${item}'
                             })]
                         }),
                     },
