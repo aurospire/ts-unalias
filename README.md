@@ -84,18 +84,34 @@ type PathAlias = {
 };
 ```
 
-### `ExternalPath`
+### `ExternalModuleDirection`
 
-Represents an external path resolution result.
+Represents the direction of an external module resolution.
 
 ```typescript
-type ExternalPath = {
-    type?: 'import' | 'export';
-    aliased: boolean;
-    fromPath: string;
-    toPath: string;
-    fullToPath: string;
-    relativeToPath: string;
+type ExternalModuleDirection = 'import' | 'export';
+```
+
+### ExternalModuleType
+ Represents the type of an external module.
+
+ ```typescript
+ type ExternalModuleType = 'module' | 'path' | 'alias';
+```
+
+### ExternalModule
+
+Represents the result of resolving an external module.
+
+```typescript
+type ExternalModule = {    
+    direction: ExternalModuleDirection;
+    type: ExternalModuleType;    
+    from: string;    
+    to: string;    
+    originalTo: string;    
+    fullToPath?: string;    
+    relativeToPath?: string;
 };
 ```
 
@@ -115,7 +131,7 @@ type WebpackAlias = {
 Represents a Jest alias configuration.
 
 ```typescript
-type WebpackAlias = {
+type JestAlias = {
     from: string;
     to: string;
 };
@@ -156,11 +172,22 @@ Options for the unalias transformer.
 type UnaliasTransformOptions = {
     onTsPath?: NotifierType<TsConfigPath>;
     onPathAlias?: NotifierType<PathAlias>;
-    onExternalPath?: NotifierType<ExternalPath>;
+    onExternalModule?: NotifierType<ExternalModule>;
 };
 ```
 
 ## Functions
+
+### getTsCompilerOptions
+
+Gets TypeScript compiler options from a tsconfig file.
+
+```typescript
+getTsCompilerOptions(
+    searchPath?: string,
+    configName?: string
+): ts.CompilerOptions
+```
 
 ### extractTsConfigPaths
 
@@ -195,27 +222,16 @@ extractWebpackAliases(
 ): Record<string, string>
 ```
 
-### getTsCompilerOptions
+### resolveExternalModule
 
-Gets TypeScript compiler options from a tsconfig file.
-
-```typescript
-getTsCompilerOptions(
-    searchPath?: string,
-    configName?: string
-): ts.CompilerOptions
-```
-
-### resolveExternalPath
-
-Resolves an external path using provided path aliases.
+Resolves and classifies an external module.
 
 ```typescript
-resolveExternalPath(
+resolveExternalModule(
     fromPath: string,
-    toPath: string,
+    toModule: string,
     aliases: PathAlias[]
-): ExternalPath
+): ExternalModule
 ```
 
 ### unaliasTransformerFactory
@@ -293,7 +309,7 @@ const config: Configuration = {
                             // Use to unalias all imports/exports in d.ts files
                             afterDeclarations: [unaliasTransformerFactory(program, {
                                 onPathAlias: true
-                                onExternalPath: '[EXTERNAL PATH]: ${item}'
+                                onExternalModule: '[EXTERNAL MODULE]: ${item}'
                             })]
                         }),
                     },

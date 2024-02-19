@@ -1,2 +1,2 @@
-export * from './resolveExternalPath';
+export * from './resolveExternalModule';
 export * from './unaliasTransformerFactory';

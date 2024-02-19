@@ -25,6 +25,9 @@
         "test": "jest --config test/jest.config.ts",
         "vigil": "jest --watch --config test/jest.config.ts"
     },
+    "dependencies": {
+        "zod": "^3.22.4"
+    },
     "devDependencies": {
         "@types/jest": "^29.5.11",
         "@types/node": "^20.11.17",
