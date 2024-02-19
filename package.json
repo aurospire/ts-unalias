@@ -18,6 +18,10 @@
     "config": {
         "watch": "./src;package*.json"
     },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/aurospire/ts-unalias"
+    },
     "scripts": {
         "start": "node ./dist/index.js",
         "watch": "nodemon -e ts,js,tsx,jsx,json --watch src --watch 'package*.json' --exec 'tsc -p . && node ./dist/index.js || exit 1'",
