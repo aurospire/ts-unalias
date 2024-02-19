@@ -33,7 +33,7 @@ const config: Configuration = {
         alias: webpackAliases(nodepath.resolve(__dirname, '..', '..'), {
             onTsPath: true,
             onPathAlias: false,
-            onWebpackAlias: '[WEBPACK]: ${item}'
+            onWebpackAlias: '[WEPBACK]: ${item}'
         })
     },
     module: {
@@ -46,7 +46,10 @@ const config: Configuration = {
                         getCustomTransformers: (program: any) => ({
                             afterDeclarations: [unaliasTransformerFactory(program, {
                                 onPathAlias: true,
-                                onExternalPath: true,
+                                onExternalModule: (item => {
+                                    if (item.type === 'alias')
+                                        console.log(item);
+                                }),
                             })]
                         }),
                     },
