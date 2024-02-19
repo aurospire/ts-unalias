@@ -2,7 +2,7 @@
     "name": "ts-unalias",
     "description": "A TypeScript transformer that rewrites module alias paths in emitted .d.ts files to their relative paths as per tsconfig.json compilerOptions.paths.",
     "author": "aurospire",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "license": "MIT",
     "main": "dist/index.ts",
     "types": "dist/index.d.ts",
@@ -17,6 +17,10 @@
     },
     "config": {
         "watch": "./src;package*.json"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/aurospire/ts-unalias"
     },
     "scripts": {
         "start": "node ./dist/index.js",
